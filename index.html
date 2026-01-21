@@ -1,0 +1,145 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div class="container" id="navbar">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"><i class="fas fa-robot"></i> RoboLearn</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#aboutUs">About Us</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Learning Material
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Topic 1</a></li>
+              <li><a class="dropdown-item" href="#">Topic 2</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#aboutUs">Reflection</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div class="container" id="hero">
+  <div class="row align-items-center gy-4">
+    <div class="col-lg-7">
+      <h1 class="title">Welcome to RoboLearn</h1>
+      <div class="subtitle">where you learn about robots — practical, visual, and fun.</div>
+      <p class="lead">This website is a part of a community project for <strong style="color: #00d4ff;">CSC4702-1: Robotic System Development</strong> that explains fundamental concepts across beginner and advanced levels. Explore bite-sized videos, interactive demos, and simple explanations designed for junior learners and undergraduates.</p>
+
+      <div class="d-flex gap-2">
+        <a class="btn btn-accent" href="videos.html">Watch Videos</a>
+        <a class="btn btn-outline-light" href="interactive.html">Try Simulation</a>
+      </div>
+    </div>
+
+    <div class="col-lg-5 text-center">
+      <img src="img/robot.png" style="width: 300px" class="robot-float" alt="Floating Robot">
+    </div>
+  </div>
+</div>
+
+<section id="projectOverview" class="py-5">
+  <div class="container">
+    <div class="row gy-4">
+
+      <!-- Objectives -->
+      <div class="col-md-6">
+        <h2 class="title">Project Objectives</h2>
+        <ul class="lead">
+          <li>Introduce fundamental robotics concepts using simple explanations</li>
+          <li>Support learning through interactive simulations and videos</li>
+          <li>Adapt robotics knowledge for beginners and undergraduate students</li>
+        </ul>
+      </div>
+
+      <!-- Concept Overview -->
+      <div class="col-md-6">
+        <h2 class="title">Robotics Concept Overview</h2>
+        <p class="lead">
+          This project focuses on understanding how robots represent position and orientation
+          using coordinate frames and rotation concepts. These ideas are essential for describing
+          robot movement, transformations, and pose in robotic systems.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<section id="aboutUs">
+  <div class="container">
+    <h1 class="title" style="font-weight: bolder; text-align: center;">Meet The Team</h1>
+    <div class="row mt-4">
+      <div class="col-md-3">
+        <div class="card">
+          <img src="img/member1.jpg" class="card-img-top" alt="Member 1">
+          <div class="card-body">
+            <h5 class="card-title">Alice</h5>
+            <p class="card-text">9</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card">
+          <img src="img/member1.jpg" class="card-img-top" alt="Member 1">
+          <div class="card-body">
+            <h5 class="card-title">Alice</h5>
+            <p class="card-text">Role / Description</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card">
+          <img src="img/member1.jpg" class="card-img-top" alt="Member 1">
+          <div class="card-body">
+            <h5 class="card-title">Alice</h5>
+            <p class="card-text">Role / Description</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card">
+          <img src="img/member1.jpg" class="card-img-top" alt="Member 1">
+          <div class="card-body">
+            <h5 class="card-title">Alice</h5>
+            <p class="card-text">Role / Description</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+
+</html>
