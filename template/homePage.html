@@ -1,0 +1,594 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RoboLearn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* --- Global Styles --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 50%, #fff5f7 100%);
+      color: #2c3e50;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* --- Navbar --- */
+    #navbar {
+      border-radius: 50px;
+      padding: 10px 40px;
+      box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+      margin-top: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    #navbar .navbar-brand,
+    #navbar .nav-link {
+      color: #fff !important;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    #navbar .nav-link:hover {
+      opacity: 0.85;
+      transform: translateY(-2px);
+    }
+
+    #navbar .dropdown-menu {
+      border-radius: 15px;
+      border: none;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    /* --- Hero Section --- */
+    #hero {
+      position: relative;
+      z-index: 1;
+      padding: 100px 20px 80px;
+      min-height: 85vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .title {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 800;
+      font-size: 3.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 1.5rem;
+      color: #667eea;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+
+    .lead {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: #5a6c7d;
+      margin-bottom: 35px;
+      font-weight: 500;
+    }
+
+    /* --- Buttons --- */
+    .btn-accent {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      letter-spacing: 0.5px;
+    }
+
+    .btn-accent:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+      color: white;
+    }
+
+    .btn-outline-custom {
+      color: #667eea;
+      border: 2px solid #667eea;
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 50px;
+      background: transparent;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-custom:hover {
+      background-color: #667eea;
+      color: #fff;
+      border-color: #667eea;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-25px);
+      }
+      100% {
+        transform: translateY(0px);
+      }
+    }
+
+    .robot-float {
+      width: 350px;
+      animation: float 4s ease-in-out infinite;
+      filter: drop-shadow(0 10px 30px rgba(102, 126, 234, 0.3));
+    }
+
+    /* --- Section Styling --- */
+    section {
+      padding: 80px 0;
+      position: relative;
+    }
+
+    .section-title {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 800;
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .section-subtitle {
+      color: #5a6c7d;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-bottom: 50px;
+      font-weight: 500;
+    }
+
+    /* --- Project Objectives --- */
+    #projectObjective {
+      background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
+    }
+
+    .objective-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 30px;
+      text-align: center;
+      transition: all 0.4s ease;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+      height: 100%;
+      border: 2px solid transparent;
+    }
+
+    .objective-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+    }
+
+    .objective-card i {
+      font-size: 3rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    .objective-card h5 {
+      color: #2c3e50;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+    }
+
+    .objective-card p {
+      color: #5a6c7d;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* --- Topics Section --- */
+    #topicsAudience {
+      background: white;
+    }
+
+    .topic-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 25px;
+      padding: 45px 35px;
+      text-align: center;
+      transition: all 0.4s ease;
+      box-shadow: 0 10px 35px rgba(102, 126, 234, 0.3);
+      height: 100%;
+      border: none;
+      color: white;
+    }
+
+    .topic-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);
+    }
+
+    .topic-card .badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    .topic-card h4 {
+      color: white;
+      font-weight: 800;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    .topic-card p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 25px;
+    }
+
+    .btn-topic {
+      background: white;
+      color: #667eea;
+      padding: 12px 35px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 50px;
+      border: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-topic:hover {
+      background: #f0f4ff;
+      color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- Team Section --- */
+    #aboutUs {
+      background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
+    }
+
+    .team-card {
+      background: white;
+      border-radius: 25px;
+      padding: 40px 30px;
+      text-align: center;
+      transition: all 0.4s ease;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      height: 100%;
+      border: 2px solid transparent;
+    }
+
+    .team-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+    }
+
+    .team-img-wrapper {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 25px;
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 5px solid #667eea;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
+      transition: all 0.4s ease;
+    }
+
+    .team-card:hover .team-img-wrapper {
+      border-color: #764ba2;
+      box-shadow: 0 12px 35px rgba(118, 75, 162, 0.45);
+      transform: scale(1.08);
+    }
+
+    .team-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .team-card h5 {
+      color: #2c3e50;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      min-height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.4;
+    }
+
+    .student-id {
+      color: #667eea;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .team-card p {
+      color: #5a6c7d;
+      font-size: 0.95rem;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .btn-reflection {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-reflection:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+      color: white;
+    }
+
+    .btn-reflection i {
+      margin-right: 8px;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .title {
+        font-size: 2.5rem;
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+
+      #hero {
+        min-height: auto;
+        padding: 60px 20px;
+      }
+
+      .robot-float {
+        width: 250px;
+        margin-top: 40px;
+      }
+
+      .team-card {
+        margin-bottom: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container" id="navbar">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"><i class="fas fa-robot"></i> RoboLearn</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#aboutUs">About Us</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Learning Material
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="../template/topic1.html">Topic 1</a></li>
+              <li><a class="dropdown-item" href="../template/topic2.html">Topic 2</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../template/quizPage.html">Quiz</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div class="container" id="hero">
+  <div class="row align-items-center gy-4">
+    <div class="col-lg-7 hero-content">
+      <h1 class="title">Welcome to RoboLearn</h1>
+      <div class="subtitle">where you learn about robots — practical, visual, and fun.</div>
+      <p class="lead">This website is a part of a community project for <strong style="color: #667eea;">CSC4702-1: Robotic System Development</strong> that explains fundamental concepts across beginner and advanced levels. Explore bite-sized videos, interactive demos, and simple explanations designed for junior learners and undergraduates.</p>
+
+      <div class="d-flex gap-3 flex-wrap">
+        <a class="btn btn-accent" href="videos.html">Watch Videos</a>
+        <a class="btn btn-outline-custom" href="interactive.html">Try Simulation</a>
+      </div>
+    </div>
+
+    <div class="col-lg-5 text-center">
+      <img src="../img/robot.png" class="robot-float" alt="Floating Robot">
+    </div>
+  </div>
+</div>
+
+<section id="projectObjective">
+  <div class="container">
+    <h2 class="section-title">Project Objectives</h2>
+    <p class="section-subtitle">Our mission is to make robotics accessible, engaging, and easy to understand for everyone.</p>
+
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6">
+        <div class="objective-card">
+          <i class="fas fa-lightbulb"></i>
+          <h5>Simplify Robotics Concepts</h5>
+          <p>Introduce fundamental robotics ideas in a clear, easy-to-understand way for all learners.</p>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <div class="objective-card">
+          <i class="fas fa-play-circle"></i>
+          <h5>Interactive Learning</h5>
+          <p>Support learning through engaging simulations, videos, and visual demonstrations.</p>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <div class="objective-card">
+          <i class="fas fa-user-graduate"></i>
+          <h5>Adapt to Different Levels</h5>
+          <p>Provide content suitable for beginners, junior school learners, and undergraduate students.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="topicsAudience">
+  <div class="container">
+    <h2 class="section-title">Topics & Learning Paths</h2>
+    <p class="section-subtitle">Explore robotics concepts tailored for different learning levels and skill sets.</p>
+
+    <div class="row g-5 justify-content-center">
+      <div class="col-lg-5 col-md-6">
+        <div class="topic-card">
+          <span class="badge">Junior School Level</span>
+          <h4>Robot Sensors and Perception</h4>
+          <p>Discover how robots sense their environment and respond to light, touch, and distance in fun, interactive ways.</p>
+          <a href="template/topic1.html" class="btn btn-topic">Explore Topic 1 <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-5 col-md-6">
+        <div class="topic-card">
+          <span class="badge">Undergraduate Level</span>
+          <h4>Coordinate Frames & Transformations</h4>
+          <p>Learn how robots represent position and orientation and apply transformations in 3D space.</p>
+          <a href="template/topic2.html" class="btn btn-topic">Explore Topic 2 <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="aboutUs">
+  <div class="container">
+    <h2 class="section-title">Meet The Team</h2>
+    <p class="section-subtitle">The passionate minds behind RoboLearn, dedicated to making robotics education accessible.</p>
+
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-3 col-md-6">
+        <div class="team-card">
+          <div class="team-img-wrapper">
+            <img src="img/member1.jpg" alt="Aina Nur Wafiy">
+          </div>
+          <h5>Aina Nur Wafiy Binti Ahmad Rizal</h5>
+          <p class="student-id">225156</p>
+          <p>Project Coordinator</p>
+          <a href="../pdf/aina_reflection.pdf" target="_blank" class="btn-reflection">
+            <i class="fas fa-file-pdf"></i> View Reflection
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="team-card">
+          <div class="team-img-wrapper">
+            <img src="../img/wanaina.png" alt="Wan Aina Shafiyyah">
+          </div>
+          <h5>Wan Aina Shafiyyah Binti Wan Ismail @ Wan Roslan</h5>
+          <p class="student-id">222566</p>
+          <p>Content Developer</p>
+          <a href="../pdf/wanaina_reflection.pdf" target="_blank" class="btn-reflection">
+            <i class="fas fa-file-pdf"></i> View Reflection
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="team-card">
+          <div class="team-img-wrapper">
+            <img src="../img/hariani.png" alt="Hariani Prahana">
+          </div>
+          <h5>Hariani Prahana Binti Moh Ramli</h5>
+          <p class="student-id">223666</p>
+          <p>Technical Lead</p>
+          <a href="../pdf/hariani_reflection.pdf" target="_blank" class="btn-reflection">
+            <i class="fas fa-file-pdf"></i> View Reflection
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="team-card">
+          <div class="team-img-wrapper">
+            <img src="../img/fatin.png" alt="Fatin Nurmaryam">
+          </div>
+          <h5>Fatin Nurmaryam Binti Khairul Arifin</h5>
+          <p class="student-id">223663</p>
+          <p>Design Specialist</p>
+          <a href="../pdf/fatin_reflection.pdf" target="_blank" class="btn-reflection">
+            <i class="fas fa-file-pdf"></i> View Reflection
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+
+</html>

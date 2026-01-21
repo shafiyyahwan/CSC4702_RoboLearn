@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Quizzes - RoboLearn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 50%, #fff5f7 100%);
+      color: #2c3e50;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* --- Navbar --- */
+    #navbar {
+      border-radius: 50px;
+      padding: 10px 40px;
+      box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+      margin-top: 30px;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    #navbar .navbar-brand,
+    #navbar .nav-link {
+      color: #fff !important;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    #navbar .nav-link:hover {
+      opacity: 0.85;
+      transform: translateY(-2px);
+    }
+
+    /* --- Header Section --- */
+    .quiz-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 80px 0 60px;
+      margin-bottom: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quiz-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,117.3C1248,117,1344,139,1392,149.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+      background-size: cover;
+      opacity: 0.3;
+    }
+
+    .quiz-header .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .quiz-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .quiz-title {
+      color: white;
+      font-weight: 800;
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .quiz-description {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.25rem;
+      line-height: 1.8;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* --- Quiz Selection Section --- */
+    .quiz-selection {
+      margin-bottom: 60px;
+    }
+
+    .quiz-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .quiz-card {
+      background: white;
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quiz-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .quiz-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 50px rgba(102, 126, 234, 0.25);
+      border-color: #667eea;
+    }
+
+    .quiz-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .quiz-card.active {
+      border-color: #667eea;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    }
+
+    .quiz-card.active::before {
+      transform: scaleX(1);
+    }
+
+    .quiz-icon {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 25px;
+    }
+
+    .quiz-card-title {
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin-bottom: 15px;
+    }
+
+    .quiz-card-description {
+      color: #6c757d;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .quiz-card-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .topic-tag {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .select-quiz-btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .select-quiz-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* --- Quiz Container --- */
+    .quiz-container {
+      background: white;
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+      margin-bottom: 60px;
+      display: none;
+    }
+
+    .quiz-container.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .quiz-wrapper {
+      width: 100%;
+      min-height: 600px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .quiz-wrapper iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+
+    .back-to-selection {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      margin-bottom: 30px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .back-to-selection:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+      color: white;
+    }
+
+    /* --- Back Button --- */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      margin-top: 20px;
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+      color: white;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .quiz-title {
+        font-size: 2.5rem;
+      }
+
+      .quiz-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-wrapper iframe {
+        height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="container" id="navbar">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="../index.html"><i class="fas fa-robot"></i> RoboLearn</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html#aboutUs">About Us</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<!-- Quiz Header -->
+<div class="quiz-header">
+  <div class="container text-center">
+    <span class="quiz-badge"><i class="fas fa-brain me-2"></i>Test Your Knowledge</span>
+    <h1 class="quiz-title">Interactive Quizzes</h1>
+    <p class="quiz-description">Challenge yourself with our fun and educational quizzes! Test what you've learned about robotics and see how much you know.</p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+
+  <!-- Quiz Selection Section -->
+  <div class="quiz-selection" id="quizSelection">
+    <h2 class="text-center mb-5" style="font-weight: 800; font-size: 2.2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+      <i class="fas fa-clipboard-list me-3"></i>Choose Your Quiz
+    </h2>
+
+    <div class="quiz-cards">
+      <!-- Topic 1 Quiz Card -->
+      <div class="quiz-card" onclick="showQuiz('topic1')">
+        <div class="quiz-icon">
+          <i class="fas fa-microchip"></i>
+        </div>
+        <h3 class="quiz-card-title">Topic 1: Robot Sensors & Perception</h3>
+        <p class="quiz-card-description">Test your understanding of how robots sense their environment using light, touch, temperature, and distance sensors.</p>
+        <div class="quiz-card-topics">
+          <span class="topic-tag"><i class="fas fa-lightbulb me-1"></i> Light Sensors</span>
+          <span class="topic-tag"><i class="fas fa-hand-pointer me-1"></i> Touch Sensors</span>
+          <span class="topic-tag"><i class="fas fa-thermometer-half me-1"></i> Temperature</span>
+        </div>
+        <button class="select-quiz-btn">
+          Start Quiz <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Topic 2 Quiz Card -->
+      <div class="quiz-card" onclick="showQuiz('topic2')">
+        <div class="quiz-icon">
+          <i class="fas fa-cogs"></i>
+        </div>
+        <h3 class="quiz-card-title">Topic 2: Coordinate Frame & Transformation</h3>
+        <p class="quiz-card-description">
+          Test your understanding of coordinate frames and transformations, including how robots represent position, orientation, and movement in different reference frames.
+        </p>
+        <div class="quiz-card-topics">
+          <span class="topic-tag"><i class="fas fa-compass me-1"></i> Coordinate Frames</span>
+          <span class="topic-tag"><i class="fas fa-arrows-rotate me-1"></i> Position & Orientation</span>
+          <span class="topic-tag"><i class="fas fa-cube me-1"></i> Transformations</span>
+        </div>
+
+        <button class="select-quiz-btn">
+          Start Quiz <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic 1 Quiz Container -->
+  <div class="quiz-container" id="topic1Quiz">
+    <button class="back-to-selection" onclick="backToSelection()">
+      <i class="fas fa-arrow-left"></i> Back to Quiz Selection
+    </button>
+    <div class="quiz-wrapper">
+      <iframe
+        src="https://wayground.com/embed/quiz/697089fc0de436e11599707c"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- Topic 2 Quiz Container -->
+  <div class="quiz-container" id="topic2Quiz">
+    <button class="back-to-selection" onclick="backToSelection()">
+      <i class="fas fa-arrow-left"></i> Back to Quiz Selection
+    </button>
+    <div class="quiz-wrapper">
+      <iframe
+        src="https://wayground.com/embed/quiz/697099092a40daf68165a4df"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- Back to Home Button -->
+  <div class="text-center mb-5">
+    <a href="../template/homePage.html" class="back-button">
+      <i class="fas fa-home"></i>
+      Back to Home
+    </a>
+  </div>
+
+</div>
+
+<script>
+  function showQuiz(topicId) {
+    // Hide selection section
+    document.getElementById('quizSelection').style.display = 'none';
+
+    // Hide all quiz containers
+    document.querySelectorAll('.quiz-container').forEach(container => {
+      container.classList.remove('active');
+    });
+
+    // Show selected quiz
+    const quizContainer = document.getElementById(topicId + 'Quiz');
+    quizContainer.classList.add('active');
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function backToSelection() {
+    // Show selection section
+    document.getElementById('quizSelection').style.display = 'block';
+
+    // Hide all quiz containers
+    document.querySelectorAll('.quiz-container').forEach(container => {
+      container.classList.remove('active');
+    });
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
