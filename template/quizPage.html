@@ -33,16 +33,44 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
-    #navbar .navbar-brand,
-    #navbar .nav-link {
+    #navbar .navbar-brand {
       color: #fff !important;
       font-weight: 700;
       transition: all 0.3s ease;
     }
 
+    #navbar .nav-link {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 10px 20px !important;
+      border-radius: 25px;
+      margin: 0 5px;
+    }
+
     #navbar .nav-link:hover {
-      opacity: 0.85;
-      transform: translateY(-2px);
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Active Page Styling */
+    #navbar .nav-link.active {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #fff !important;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    #navbar .dropdown-menu {
+      border-radius: 15px;
+      border: none;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    #navbar .dropdown-item.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-weight: 700;
     }
 
     /* --- Header Section --- */
@@ -321,15 +349,54 @@
 </head>
 <body>
 
-<div id="navbar-placeholder"></div>
+<!-- Navbar -->
+<div class="container" id="navbar">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
 
-<!-- Quiz Header -->
-<div class="quiz-header">
-  <div class="container text-center">
-    <span class="quiz-badge"><i class="fas fa-brain me-2"></i>Test Your Knowledge</span>
-    <h1 class="quiz-title">Interactive Quizzes</h1>
-    <p class="quiz-description">Challenge yourself with our fun and educational quizzes! Test what you've learned about robotics and see how much you know.</p>
-  </div>
+      <a class="navbar-brand" href="../index.html">
+        <i class="fas fa-robot"></i> RoboLearn
+      </a>
+
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto">
+
+          <li class="nav-item">
+            <a class="nav-link" data-page="home" href="../index.html">Home</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" data-page="about" href="../index.html#aboutUs">About Us</a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              Learning Material
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" data-page="topic1" href="topic1.html">Topic 1</a></li>
+              <li><a class="dropdown-item" data-page="topic2" href="topic2.html">Topic 2</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link active" data-page="quiz" href="quizPage.html">Quiz</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" data-page="interactive" href="interactive.html">Interactive</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
 </div>
 
 <!-- Main Content -->
@@ -418,14 +485,18 @@
 </div>
 
 <script>
+  const currentPage = 'quiz';
 
-  fetch("../components/navbar.html")
-    .then(res => res.text())
-    .then(data => {
-    document.getElementById("navbar-placeholder").innerHTML = data;
+  document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('[data-page]');
+    links.forEach(link => {
+      if (link.getAttribute('data-page') === currentPage) {
+        link.classList.add('active');
+      }
+    });
   });
 
-function showQuiz(topicId) {
+  function showQuiz(topicId) {
     // Hide selection section
     document.getElementById('quizSelection').style.display = 'none';
 
@@ -438,8 +509,10 @@ function showQuiz(topicId) {
     const quizContainer = document.getElementById(topicId + 'Quiz');
     quizContainer.classList.add('active');
 
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to the quiz container smoothly
+    setTimeout(() => {
+      quizContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }
 
   function backToSelection() {
@@ -451,10 +524,11 @@ function showQuiz(topicId) {
       container.classList.remove('active');
     });
 
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to quiz selection
+    setTimeout(() => {
+      document.getElementById('quizSelection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
