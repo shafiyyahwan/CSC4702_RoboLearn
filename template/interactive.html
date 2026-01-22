@@ -2,9 +2,819 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Learning - RoboLearn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 50%, #fff5f7 100%);
+      color: #2c3e50;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    #navbar {
+      border-radius: 50px;
+      padding: 10px 40px;
+      box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+      margin-top: 30px;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    #navbar .navbar-brand {
+      color: #fff !important;
+      font-weight: 700;
+    }
+
+    #navbar .nav-link {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 10px 20px !important;
+      border-radius: 25px;
+      margin: 0 5px;
+    }
+
+    #navbar .nav-link:hover {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    #navbar .nav-link.active {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #fff !important;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-weight: 800;
+      font-size: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .section-description {
+      color: #6c757d;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin-bottom: 30px;
+    }
+
+    .canvas-container {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    canvas {
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      max-width: 100%;
+      height: auto;
+    }
+
+    .controls {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 20px;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-label {
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .btn-control {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+    }
+
+    .btn-control:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-level {
+      background: linear-gradient(135deg, #27ae60, #229954);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+    }
+
+    .btn-level:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-level.active {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+    }
+
+    .info-panel {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .info-value {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .alert-box {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-top: 15px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .alert-box.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    .alert-danger {
+      background: #fee;
+      color: #c33;
+      border-left: 4px solid #c33;
+    }
+
+    .alert-success {
+      background: #efe;
+      color: #3c3;
+      border-left: 4px solid #3c3;
+    }
+
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes coinCollect {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.5) rotate(180deg); }
+      100% { transform: scale(0); }
+    }
+
+    .instructions {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .instructions h6 {
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 10px;
+    }
+
+    .instructions ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      color: #856404;
+      margin: 5px 0;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      margin-top: 20px;
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .section-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
+<div class="container" id="navbar">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="../index.html">
+        <i class="fas fa-robot"></i> RoboLearn
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html#aboutUs">About Us</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              Learning Material
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="topic1.html">Topic 1</a></li>
+              <li><a class="dropdown-item" href="topic2.html">Topic 2</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="quizPage.html">Quiz</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="interactive.html">Interactive</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div class="container">
+
+  <div class="section-card">
+    <h2 class="section-title">
+      <i class="fas fa-car me-2"></i> Robot Sensor Navigation Game
+    </h2>
+    <p class="section-description">
+      Learn how robots use ultrasonic sensors to detect obstacles! Your robot car has three sensors that measure distance to nearby objects. Navigate through different levels, collect all the coins, and avoid getting too close to obstacles (less than 20cm triggers a crash!). Can you complete all levels?
+    </p>
+
+    <div class="instructions">
+      <h6><i class="fas fa-info-circle me-2"></i>How to Play:</h6>
+      <ul>
+        <li>Use <strong>Arrow Keys</strong> or <strong>Buttons</strong> to move: ↑ Up, ↓ Down, ← Left, → Right</li>
+        <li><strong>Collect all coins</strong> (yellow circles) to complete the level</li>
+        <li>Sensors show distance to obstacles - if any sensor reads <strong>less than 20cm = CRASH!</strong></li>
+        <li>Watch the sensor beams: <strong style="color: #27ae60;">Green = Safe</strong>, <strong style="color: #e74c3c;">Red = Danger!</strong></li>
+        <li>Complete all 3 levels to master sensor navigation!</li>
+      </ul>
+    </div>
+
+    <div class="text-center mb-3">
+      <span class="control-label">Select Level:</span><br>
+      <button class="btn-level active" onclick="loadLevel(1)">Level 1</button>
+      <button class="btn-level" onclick="loadLevel(2)">Level 2</button>
+      <button class="btn-level" onclick="loadLevel(3)">Level 3</button>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="sensorCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="controls">
+          <div class="control-group text-center">
+            <span class="control-label">Movement Controls</span>
+            <div>
+              <button class="btn-control" onclick="moveCar('up')"><i class="fas fa-arrow-up"></i> Up</button>
+            </div>
+            <div>
+              <button class="btn-control" onclick="moveCar('left')"><i class="fas fa-arrow-left"></i> Left</button>
+              <button class="btn-control" onclick="moveCar('down')"><i class="fas fa-arrow-down"></i> Down</button>
+              <button class="btn-control" onclick="moveCar('right')"><i class="fas fa-arrow-right"></i> Right</button>
+            </div>
+            <div style="margin-top: 15px;">
+              <button class="btn-control" onclick="resetCar()"><i class="fas fa-redo"></i> Reset Level</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-panel">
+          <h6 style="margin-bottom: 15px;"><i class="fas fa-chart-line me-2"></i>Sensor Readings</h6>
+          <div class="info-item">
+            <span class="info-label">Front Sensor:</span>
+            <span class="info-value" id="frontDist">0 cm</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Left Sensor:</span>
+            <span class="info-value" id="leftDist">0 cm</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Right Sensor:</span>
+            <span class="info-value" id="rightDist">0 cm</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Coins Collected:</span>
+            <span class="info-value" id="coinsCollected">0 / 0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status:</span>
+            <span class="info-value" id="carStatus">Ready</span>
+          </div>
+        </div>
+        <div class="alert-box alert-danger" id="crashAlert">
+          <i class="fas fa-exclamation-triangle me-2"></i><strong>CRASH!</strong> Sensor detected obstacle within 20cm! Press Reset to try again.
+        </div>
+        <div class="alert-box alert-success" id="levelCompleteAlert">
+          <i class="fas fa-trophy me-2"></i><strong>Level Complete!</strong> All coins collected! Move to next level.
+        </div>
+        <div class="alert-box alert-warning" id="warningAlert">
+          <i class="fas fa-exclamation-circle me-2"></i><strong>Warning!</strong> Obstacle very close!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mb-5">
+    <a href="../index.html" class="back-button">
+      <i class="fas fa-home"></i> Back to Home
+    </a>
+  </div>
+
+</div>
+
+<script>
+  const canvas = document.getElementById('sensorCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const car = {
+    x: 100,
+    y: 300,
+    width: 40,
+    height: 60,
+    speed: 3.5,
+    angle: 0
+  };
+
+  let currentLevel = 1;
+  let coins = [];
+  let coinsCollected = 0;
+  let crashed = false;
+  let levelComplete = false;
+
+  const levels = {
+    1: {
+      obstacles: [
+        {x: 0, y: 0, width: 800, height: 20},
+        {x: 0, y: 580, width: 800, height: 20},
+        {x: 0, y: 0, width: 20, height: 600},
+        {x: 780, y: 0, width: 20, height: 600},
+        {x: 300, y: 200, width: 80, height: 200},
+        {x: 500, y: 100, width: 80, height: 300},
+      ],
+      coins: [
+        {x: 150, y: 150},
+        {x: 400, y: 300},
+        {x: 650, y: 450},
+        {x: 200, y: 500},
+        {x: 600, y: 150}
+      ],
+      startX: 100,
+      startY: 300
+    },
+    2: {
+      obstacles: [
+        {x: 0, y: 0, width: 800, height: 20},
+        {x: 0, y: 580, width: 800, height: 20},
+        {x: 0, y: 0, width: 20, height: 600},
+        {x: 780, y: 0, width: 20, height: 600},
+        {x: 150, y: 150, width: 100, height: 100},
+        {x: 400, y: 100, width: 60, height: 200},
+        {x: 250, y: 400, width: 150, height: 80},
+        {x: 550, y: 250, width: 80, height: 150},
+      ],
+      coins: [
+        {x: 100, y: 100},
+        {x: 300, y: 200},
+        {x: 500, y: 150},
+        {x: 650, y: 350},
+        {x: 350, y: 500},
+        {x: 600, y: 500}
+      ],
+      startX: 100,
+      startY: 500
+    },
+    3: {
+      obstacles: [
+        {x: 0, y: 0, width: 800, height: 20},
+        {x: 0, y: 580, width: 800, height: 20},
+        {x: 0, y: 0, width: 20, height: 600},
+        {x: 780, y: 0, width: 20, height: 600},
+        {x: 200, y: 100, width: 60, height: 150},
+        {x: 350, y: 200, width: 100, height: 60},
+        {x: 200, y: 350, width: 60, height: 150},
+        {x: 500, y: 100, width: 80, height: 120},
+        {x: 600, y: 300, width: 60, height: 200},
+        {x: 400, y: 450, width: 120, height: 60},
+      ],
+      coins: [
+        {x: 120, y: 200},
+        {x: 300, y: 150},
+        {x: 450, y: 300},
+        {x: 300, y: 450},
+        {x: 550, y: 200},
+        {x: 680, y: 450},
+        {x: 680, y: 120}
+      ],
+      startX: 80,
+      startY: 80
+    }
+  };
+
+  function loadLevel(level) {
+    currentLevel = level;
+    const levelData = levels[level];
+
+    car.x = levelData.startX;
+    car.y = levelData.startY;
+    car.angle = 0;
+
+    coins = levelData.coins.map(c => ({...c, collected: false}));
+    coinsCollected = 0;
+    crashed = false;
+    levelComplete = false;
+
+    document.getElementById('crashAlert').classList.remove('show');
+    document.getElementById('levelCompleteAlert').classList.remove('show');
+    document.getElementById('warningAlert').classList.remove('show');
+
+    document.querySelectorAll('.btn-level').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx + 1 === level);
+    });
+
+    updateCoinDisplay();
+    draw();
+  }
+
+  function drawCar() {
+    ctx.save();
+    ctx.translate(car.x, car.y);
+    ctx.rotate(car.angle);
+    ctx.fillStyle = '#667eea';
+    ctx.fillRect(-car.width/2, -car.height/2, car.width, car.height);
+    ctx.fillStyle = '#4a5fb8';
+    ctx.fillRect(-car.width/2 + 5, -car.height/2 + 5, car.width - 10, 20);
+    ctx.fillStyle = '#ffc107';
+    ctx.fillRect(-car.width/2 + 10, -car.height/2 - 5, car.width - 20, 5);
+    ctx.restore();
+  }
+
+  function drawObstacles() {
+    ctx.fillStyle = '#e74c3c';
+    levels[currentLevel].obstacles.forEach(obs => {
+      ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+    });
+  }
+
+  function drawCoins() {
+    coins.forEach((coin, idx) => {
+      if (!coin.collected) {
+        ctx.fillStyle = '#f1c40f';
+        ctx.beginPath();
+        ctx.arc(coin.x, coin.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#f39c12';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('$', coin.x, coin.y);
+      }
+    });
+  }
+
+  function checkCoinCollection() {
+    coins.forEach((coin, idx) => {
+      if (!coin.collected) {
+        const dx = car.x - coin.x;
+        const dy = car.y - coin.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 30) {
+          coin.collected = true;
+          coinsCollected++;
+          updateCoinDisplay();
+
+          if (coinsCollected === coins.length) {
+            levelComplete = true;
+            document.getElementById('carStatus').textContent = 'Level Complete!';
+            document.getElementById('levelCompleteAlert').classList.add('show');
+          }
+        }
+      }
+    });
+  }
+
+  function updateCoinDisplay() {
+    document.getElementById('coinsCollected').textContent = `${coinsCollected} / ${coins.length}`;
+  }
+
+  function castRay(startX, startY, angle, maxDist = 200) {
+    const step = 2;
+    let dist = 0;
+
+    while (dist < maxDist) {
+      const checkX = startX + Math.cos(angle) * dist;
+      const checkY = startY + Math.sin(angle) * dist;
+
+      for (let obs of levels[currentLevel].obstacles) {
+        if (checkX >= obs.x && checkX <= obs.x + obs.width &&
+          checkY >= obs.y && checkY <= obs.y + obs.height) {
+          return {dist, hit: true, x: checkX, y: checkY};
+        }
+      }
+      dist += step;
+    }
+
+    return {dist: maxDist, hit: false, x: startX + Math.cos(angle) * maxDist, y: startY + Math.sin(angle) * maxDist};
+  }
+
+  function drawSensors() {
+    const sensors = [
+      {angle: car.angle - Math.PI/2, label: 'front'},
+      {angle: car.angle - Math.PI, label: 'left'},
+      {angle: car.angle, label: 'right'}
+    ];
+
+    let minDistance = 200;
+
+    sensors.forEach(sensor => {
+      const result = castRay(car.x, car.y, sensor.angle);
+
+      ctx.beginPath();
+      ctx.moveTo(car.x, car.y);
+      ctx.lineTo(result.x, result.y);
+      ctx.strokeStyle = result.hit ? '#e74c3c' : '#27ae60';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      if (result.hit) {
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.arc(result.x, result.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        if (result.dist < minDistance) minDistance = result.dist;
+      }
+
+      const distCm = Math.round(result.dist / 2);
+      const distElement = document.getElementById(sensor.label + 'Dist');
+      distElement.textContent = distCm + ' cm';
+
+      // Color code the distance based on safety
+      if (distCm < 20) {
+        distElement.style.color = '#e74c3c';
+      } else if (distCm < 40) {
+        distElement.style.color = '#f39c12';
+      } else {
+        distElement.style.color = '#fff';
+      }
+    });
+
+    if (!crashed && minDistance < 30) {
+      crashed = true;
+      document.getElementById('carStatus').textContent = 'CRASHED!';
+      document.getElementById('crashAlert').classList.add('show');
+      document.getElementById('warningAlert').classList.remove('show');
+
+      canvas.style.animation = 'shake 0.5s';
+      setTimeout(() => {
+        canvas.style.animation = '';
+      }, 500);
+
+      ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else if (!crashed && minDistance < 60) {
+      document.getElementById('warningAlert').textContent = '⚠️ Warning! Obstacle at ' + Math.round(minDistance/2) + ' cm!';
+      document.getElementById('warningAlert').classList.add('show');
+    } else if (!crashed) {
+      document.getElementById('warningAlert').classList.remove('show');
+    }
+  }
+
+  function moveCar(direction) {
+    if (crashed || levelComplete) return;
+
+    const oldX = car.x;
+    const oldY = car.y;
+    const oldAngle = car.angle;
+
+    switch(direction) {
+      case 'up':
+        car.x += Math.cos(car.angle - Math.PI/2) * car.speed;
+        car.y += Math.sin(car.angle - Math.PI/2) * car.speed;
+        break;
+      case 'down':
+        car.x -= Math.cos(car.angle - Math.PI/2) * car.speed;
+        car.y -= Math.sin(car.angle - Math.PI/2) * car.speed;
+        break;
+      case 'left':
+        car.angle -= 0.08;
+        break;
+      case 'right':
+        car.angle += 0.08;
+        break;
+    }
+
+    if (!crashed && !levelComplete) {
+      document.getElementById('carStatus').textContent = 'Moving';
+    }
+
+    checkCoinCollection();
+    draw();
+  }
+
+  function resetCar() {
+    // Clear keyboard state
+    Object.keys(keys).forEach(key => keys[key] = false);
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    loadLevel(currentLevel);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ecf0f1';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < canvas.width; i += 50) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, canvas.height);
+      ctx.stroke();
+    }
+    for (let i = 0; i < canvas.height; i += 50) {
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(canvas.width, i);
+      ctx.stroke();
+    }
+
+    drawObstacles();
+    drawCoins();
+    drawSensors();
+    drawCar();
+  }
+
+  // Keyboard state tracking for smooth movement
+  const keys = {};
+  let animationFrameId = null;
+
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      keys[e.key] = true;
+
+      if (!animationFrameId) {
+        gameLoop();
+      }
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      keys[e.key] = false;
+    }
+  });
+
+  function gameLoop() {
+    if (crashed || levelComplete) {
+      animationFrameId = null;
+      return;
+    }
+
+    let moved = false;
+
+    if (keys['ArrowUp']) {
+      moveCar('up');
+      moved = true;
+    }
+    if (keys['ArrowDown']) {
+      moveCar('down');
+      moved = true;
+    }
+    if (keys['ArrowLeft']) {
+      moveCar('left');
+      moved = true;
+    }
+    if (keys['ArrowRight']) {
+      moveCar('right');
+      moved = true;
+    }
+
+    if (moved || Object.values(keys).some(k => k)) {
+      animationFrameId = requestAnimationFrame(gameLoop);
+    } else {
+      animationFrameId = null;
+    }
+  }
+
+  loadLevel(1);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
