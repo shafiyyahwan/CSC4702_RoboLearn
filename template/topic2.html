@@ -1,165 +1,460 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>SCARA Robot Kinematics</title>
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coordinate Frames and Transformations - RoboLearn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
-      text-align: center;
-      background-color: #f4f4f9;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 50%, #fff5f7 100%);
+      color: #2c3e50;
+      overflow-x: hidden;
     }
 
-    canvas {
-      display: block;
-      margin: 20px auto;
-      border: 2px solid #ccc;
-      background-color: #fff;
+    /* --- Navbar --- */
+    #navbar {
+      border-radius: 50px;
+      padding: 10px 40px;
+      box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+      margin-top: 30px;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
-    #controls {
-      margin: 20px;
-      padding: 15px;
-      border: 1px solid #ddd;
+    #navbar .navbar-brand,
+    #navbar .nav-link {
+      color: #fff !important;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    #navbar .nav-link:hover {
+      opacity: 0.85;
+      transform: translateY(-2px);
+    }
+
+    /* --- Header Section --- */
+    .topic-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 80px 0 60px;
+      margin-bottom: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topic-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,117.3C1248,117,1344,139,1392,149.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+      background-size: cover;
+      opacity: 0.3;
+    }
+
+    .topic-header .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .topic-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 700;
       display: inline-block;
-      border-radius: 8px;
-      background-color: #e9e9e9;
+      margin-bottom: 20px;
     }
 
-    label {
-      font-weight: bold;
+    .topic-title {
+      color: white;
+      font-weight: 800;
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
-    input[type=range] {
-      width: 250px;
-      margin: 0 10px;
+    .topic-description {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.25rem;
+      line-height: 1.8;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* --- Responsible Team --- */
+    .responsible-team {
+      background: white;
+      border-radius: 20px;
+      padding: 25px 35px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      margin-top: 40px;
+      display: inline-block;
+    }
+
+    .responsible-team h6 {
+      color: #667eea;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+    }
+
+    .team-members {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .team-member {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .member-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid #667eea;
+      object-fit: cover;
+    }
+
+    .member-info {
+      text-align: left;
+    }
+
+    .member-name {
+      color: #2c3e50;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .member-id {
+      color: #667eea;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    /* --- Content Sections --- */
+    .content-section {
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-weight: 800;
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .section-title i {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* --- Video Section --- */
+    .video-container {
+      background: white;
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+      margin-bottom: 60px;
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* --- Objectives --- */
+    .objectives-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+
+    .objective-item {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      display: flex;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .objective-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+    }
+
+    .objective-icon {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .objective-text {
+      color: #2c3e50;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* --- Slides Section --- */
+    .slides-container {
+      background: white;
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+    }
+
+    .slides-wrapper {
+      position: relative;
+      width: 100%;
+      height: 700px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .slides-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* --- Back Button --- */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      margin-top: 40px;
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+      color: white;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .topic-title {
+        font-size: 2.5rem;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+      }
+
+      .slides-wrapper {
+        height: 500px;
+      }
+
+      .team-members {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .responsible-team {
+        text-align: center;
+      }
+
+      .team-member {
+        flex-direction: column;
+        text-align: center;
+      }
     }
   </style>
-
 </head>
 <body>
-<h1>SCARA Robot Simulation (Forward Kinematics)</h1>
+<div id="navbar-placeholder"></div>
 
-<div id="controls">
-  <label for="slider1">Joint 1 Angle ($\theta_1$):</label>
-  <input type="range" id="slider1" min="0" max="360" value="45" step="1">
-  <span id="angle1">45°</span>
+<!-- Topic Header -->
+<div class="topic-header">
+  <div class="container text-center">
+    <span class="topic-badge"><i class="fas fa-graduation-cap me-2"></i>Undergraduate Level</span>
+    <h1 class="topic-title">Coordinate Frames and Transformations</h1>
+    <p class="topic-description">Master the mathematical foundations of robotics by learning how to represent positions, orientations, and transformations in 3D space using coordinate frames.</p>
 
-  <br><br>
-
-  <label for="slider2">Joint 2 Angle ($\theta_2$):</label>
-  <input type="range" id="slider2" min="-180" max="180" value="90" step="1">
-  <span id="angle2">90°</span>
+    <div class="responsible-team">
+      <h6><i class="fas fa-users me-2"></i>Prepared By</h6>
+      <div class="team-members">
+        <div class="team-member">
+          <img src="../img/wanaina.png" alt="Wan Aina Shafiyyah" class="member-avatar">
+          <div class="member-info">
+            <p class="member-name">Wan Aina Shafiyyah</p>
+            <p class="member-id">222566</p>
+          </div>
+        </div>
+        <div class="team-member">
+          <img src="../img/hariani.png" alt="Hariani Prahana" class="member-avatar">
+          <div class="member-info">
+            <p class="member-name">Hariani Prahana</p>
+            <p class="member-id">223666</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<script>// Global variables for p5.js
-let slider1, slider2;
-let L1 = 150; // Length of the first link (shoulder to elbow)
-let L2 = 100; // Length of the second link (elbow to end effector)
-let originX, originY;
+<!-- Main Content -->
+<div class="container">
 
-// p5.js setup function: runs once
-function setup() {
-  createCanvas(600, 400);
-  angleMode(DEGREES); // Use degrees for easy user input
+  <!-- Video Section -->
+  <div class="content-section">
+    <h2 class="section-title">
+      <i class="fas fa-play-circle"></i>
+      Introduction Video
+    </h2>
+    <div class="video-container">
+      <div class="video-wrapper">
+        <iframe
+          src="https://drive.google.com/file/d/YOUR_VIDEO_ID/preview"
+          allow="autoplay; encrypted-media"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </div>
 
-  // Define the base/origin of the robot arm (center bottom of the canvas)
-  originX = width / 2;
-  originY = height;
+  <!-- Learning Objectives -->
+  <div class="content-section">
+    <h2 class="section-title">
+      <i class="fas fa-bullseye"></i>
+      Learning Objectives
+    </h2>
+    <div class="objectives-grid">
+      <div class="objective-item">
+        <div class="objective-icon">
+          <i class="fas fa-cube"></i>
+        </div>
+        <p class="objective-text">Understand what a coordinate frame is and why it is used in robotics.</p>
+      </div>
 
-  // Initialize and reference the sliders from the HTML
-  slider1 = document.getElementById('slider1');
-  slider2 = document.getElementById('slider2');
+      <div class="objective-item">
+        <div class="objective-icon">
+          <i class="fas fa-vector-square"></i>
+        </div>
+        <p class="objective-text">Learn how to represent points and vectors in different coordinate frames.</p>
+      </div>
 
-  // Attach an event listener to update the angle display and redraw on change
-  slider1.addEventListener('input', updateRobot);
-  slider2.addEventListener('input', updateRobot);
+      <div class="objective-item">
+        <div class="objective-icon">
+          <i class="fas fa-sync-alt"></i>
+        </div>
+        <p class="objective-text">Apply translation and rotation transformations between frames.</p>
+      </div>
 
-  // Initial draw
-  updateRobot();
-}
+      <div class="objective-item">
+        <div class="objective-icon">
+          <i class="fas fa-vr-cardboard"></i>
+        </div>
+        <p class="objective-text">Use simulation tools (GeoGebra 3D) to visualize frame interactions.</p>
+      </div>
 
-// p5.js draw function: runs repeatedly (not used for this static control,
-// we use updateRobot() instead)
-function draw() {
-  // The main drawing logic is inside updateRobot() for better control
-  // of redraw when only a slider changes.
-}
+      <div class="objective-item">
+        <div class="objective-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <p class="objective-text">Analyze sensor and robot motion data using frame transformations.</p>
+      </div>
+    </div>
+  </div>
 
-// Function to calculate and draw the robot
-function updateRobot() {
-  // 1. Get current angle values from sliders
-  let theta1 = float(slider1.value);
-  let theta2 = float(slider2.value);
+  <!-- Slides Section -->
+  <div class="content-section">
+    <h2 class="section-title">
+      <i class="fas fa-file-powerpoint"></i>
+      Presentation Slides
+    </h2>
+    <div class="slides-container">
+      <div class="slides-wrapper">
+        <iframe
+          src="../slides/Topic2_CoordinateFrames.pdf">
+        </iframe>
+      </div>
+    </div>
+  </div>
 
-  // Update HTML display
-  document.getElementById('angle1').innerText = `${theta1}°`;
-  document.getElementById('angle2').innerText = `${theta2}°`;
+  <!-- Back Button -->
+  <div class="text-center mb-5">
+    <a href="../index.html" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      Back to Home
+    </a>
+  </div>
 
-  // 2. Clear canvas for redraw
-  background(220);
-  translate(originX, originY); // Move origin to the robot base
+</div>
 
-  // --- FORWARD KINEMATICS (FK) CALCULATION ---
-
-  // Joint 1 position (always at the origin: (0, 0) after translate)
-  let J1 = { x: 0, y: 0 };
-
-  // Link 1 (Shoulder) - Calculates the Elbow Position (J2)
-  let J2x = L1 * cos(theta1 - 90);
-  let J2y = L1 * sin(theta1 - 90);
-  let J2 = { x: J2x, y: J2y };
-
-  // Link 2 (Elbow) - Calculates the End-Effector Position (EE)
-  // The second link's angle is relative to the first link.
-  let EE_x = J2x + L2 * cos(theta1 + theta2 - 90);
-  let EE_y = J2y + L2 * sin(theta1 + theta2 - 90);
-  let EE = { x: EE_x, y: EE_y };
-
-  // The SCARA rotation is typically in the X-Y plane with joints rotating
-  // around the Z-axis. Since p5.js Y-axis is inverted (0 is top), we subtract 90
-  // from the angles to start from the top and rotate clockwise like a typical SCARA.
-
-  // --- DRAWING ---
-
-  // Draw Link 1 (Shoulder)
-  strokeWeight(10);
-  stroke(63, 94, 251); // Blue
-  line(J1.x, J1.y, J2.x, J2.y);
-
-  // Draw Link 2 (Forearm)
-  stroke(252, 70, 107); // Pink
-  line(J2.x, J2.y, EE.x, EE.y);
-
-  // Draw Joints and End-Effector
-  noStroke();
-  fill(0); // Black
-
-  // Draw Joint 1 (Base)
-  ellipse(J1.x, J1.y, 20, 20);
-
-  // Draw Joint 2 (Elbow)
-  ellipse(J2.x, J2.y, 15, 15);
-
-  // Draw End-Effector (EE)
-  fill(0, 200, 0); // Green
-  ellipse(EE.x, EE.y, 12, 12);
-
-  // Draw a small line for the end effector's orientation (optional)
-  stroke(0, 200, 0);
-  strokeWeight(2);
-  // The orientation is the sum of the joint angles (minus the 90 offset)
-  line(EE.x, EE.y, EE.x + 15 * cos(theta1 + theta2 - 90), EE.y + 15 * sin(theta1 + theta2 - 90));
-
-  // Optional: Draw the workspace circle
-  noFill();
-  stroke(0, 0, 0, 50); // Light gray
-  strokeWeight(1);
-  let maxReach = L1 + L2;
-  ellipse(0, 0, maxReach * 2, maxReach * 2);
-
-  // Reset transformations for future drawing if needed
-  // pop() is better, but since we draw everything in updateRobot, it's fine.
-}</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script>
+  fetch("../components/navbar.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("navbar-placeholder").innerHTML = data;
+    });
+</script>
 </body>
 </html>

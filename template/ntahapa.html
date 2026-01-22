@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SCARA Robot Kinematics</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #f4f4f9;
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 2px solid #ccc;
+      background-color: #fff;
+    }
+
+    #controls {
+      margin: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      display: inline-block;
+      border-radius: 8px;
+      background-color: #e9e9e9;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type=range] {
+      width: 250px;
+      margin: 0 10px;
+    }
+  </style>
+
+</head>
+<body>
+<h1>SCARA Robot Simulation (Forward Kinematics)</h1>
+
+<div id="controls">
+  <label for="slider1">Joint 1 Angle ($\theta_1$):</label>
+  <input type="range" id="slider1" min="0" max="360" value="45" step="1">
+  <span id="angle1">45°</span>
+
+  <br><br>
+
+  <label for="slider2">Joint 2 Angle ($\theta_2$):</label>
+  <input type="range" id="slider2" min="-180" max="180" value="90" step="1">
+  <span id="angle2">90°</span>
+</div>
+
+<script>// Global variables for p5.js
+let slider1, slider2;
+let L1 = 150; // Length of the first link (shoulder to elbow)
+let L2 = 100; // Length of the second link (elbow to end effector)
+let originX, originY;
+
+// p5.js setup function: runs once
+function setup() {
+  createCanvas(600, 400);
+  angleMode(DEGREES); // Use degrees for easy user input
+
+  // Define the base/origin of the robot arm (center bottom of the canvas)
+  originX = width / 2;
+  originY = height;
+
+  // Initialize and reference the sliders from the HTML
+  slider1 = document.getElementById('slider1');
+  slider2 = document.getElementById('slider2');
+
+  // Attach an event listener to update the angle display and redraw on change
+  slider1.addEventListener('input', updateRobot);
+  slider2.addEventListener('input', updateRobot);
+
+  // Initial draw
+  updateRobot();
+}
+
+// p5.js draw function: runs repeatedly (not used for this static control,
+// we use updateRobot() instead)
+function draw() {
+  // The main drawing logic is inside updateRobot() for better control
+  // of redraw when only a slider changes.
+}
+
+// Function to calculate and draw the robot
+function updateRobot() {
+  // 1. Get current angle values from sliders
+  let theta1 = float(slider1.value);
+  let theta2 = float(slider2.value);
+
+  // Update HTML display
+  document.getElementById('angle1').innerText = `${theta1}°`;
+  document.getElementById('angle2').innerText = `${theta2}°`;
+
+  // 2. Clear canvas for redraw
+  background(220);
+  translate(originX, originY); // Move origin to the robot base
+
+  // --- FORWARD KINEMATICS (FK) CALCULATION ---
+
+  // Joint 1 position (always at the origin: (0, 0) after translate)
+  let J1 = { x: 0, y: 0 };
+
+  // Link 1 (Shoulder) - Calculates the Elbow Position (J2)
+  let J2x = L1 * cos(theta1 - 90);
+  let J2y = L1 * sin(theta1 - 90);
+  let J2 = { x: J2x, y: J2y };
+
+  // Link 2 (Elbow) - Calculates the End-Effector Position (EE)
+  // The second link's angle is relative to the first link.
+  let EE_x = J2x + L2 * cos(theta1 + theta2 - 90);
+  let EE_y = J2y + L2 * sin(theta1 + theta2 - 90);
+  let EE = { x: EE_x, y: EE_y };
+
+  // The SCARA rotation is typically in the X-Y plane with joints rotating
+  // around the Z-axis. Since p5.js Y-axis is inverted (0 is top), we subtract 90
+  // from the angles to start from the top and rotate clockwise like a typical SCARA.
+
+  // --- DRAWING ---
+
+  // Draw Link 1 (Shoulder)
+  strokeWeight(10);
+  stroke(63, 94, 251); // Blue
+  line(J1.x, J1.y, J2.x, J2.y);
+
+  // Draw Link 2 (Forearm)
+  stroke(252, 70, 107); // Pink
+  line(J2.x, J2.y, EE.x, EE.y);
+
+  // Draw Joints and End-Effector
+  noStroke();
+  fill(0); // Black
+
+  // Draw Joint 1 (Base)
+  ellipse(J1.x, J1.y, 20, 20);
+
+  // Draw Joint 2 (Elbow)
+  ellipse(J2.x, J2.y, 15, 15);
+
+  // Draw End-Effector (EE)
+  fill(0, 200, 0); // Green
+  ellipse(EE.x, EE.y, 12, 12);
+
+  // Draw a small line for the end effector's orientation (optional)
+  stroke(0, 200, 0);
+  strokeWeight(2);
+  // The orientation is the sum of the joint angles (minus the 90 offset)
+  line(EE.x, EE.y, EE.x + 15 * cos(theta1 + theta2 - 90), EE.y + 15 * sin(theta1 + theta2 - 90));
+
+  // Optional: Draw the workspace circle
+  noFill();
+  stroke(0, 0, 0, 50); // Light gray
+  strokeWeight(1);
+  let maxReach = L1 + L2;
+  ellipse(0, 0, maxReach * 2, maxReach * 2);
+
+  // Reset transformations for future drawing if needed
+  // pop() is better, but since we draw everything in updateRobot, it's fine.
+}</script>
+
+</body>
+</html>
