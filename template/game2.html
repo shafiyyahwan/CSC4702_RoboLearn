@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SCARA Robot Control - RoboLearn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 50%, #fff5f7 100%);
+      color: #2c3e50;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    #navbar {
+      border-radius: 50px;
+      padding: 10px 40px;
+      box-shadow: 0 8px 30px rgba(74, 144, 226, 0.15);
+      margin-top: 30px;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    #navbar .navbar-brand {
+      color: #fff !important;
+      font-weight: 700;
+    }
+
+    #navbar .nav-link {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 10px 20px !important;
+      border-radius: 25px;
+      margin: 0 5px;
+    }
+
+    #navbar .nav-link:hover {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    #navbar .nav-link.active {
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #fff !important;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-weight: 800;
+      font-size: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .section-description {
+      color: #6c757d;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin-bottom: 30px;
+    }
+
+    .canvas-container {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    canvas {
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .control-panel {
+      background: #fff;
+      border: 2px solid #667eea;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .control-label {
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 10px;
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    .slider-container {
+      margin: 15px 0;
+    }
+
+    .slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
+    }
+
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
+      border: none;
+    }
+
+    .info-panel {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.9rem;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .info-value {
+      font-weight: 800;
+      font-family: 'Courier New', monospace;
+    }
+
+    .instructions {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .instructions h6 {
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 10px;
+    }
+
+    .instructions ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      color: #856404;
+      margin: 5px 0;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      margin-top: 20px;
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+      color: white;
+    }
+
+    .btn-grab {
+      background: linear-gradient(135deg, #27ae60, #229954);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      font-size: 1.1rem;
+      margin-top: 10px;
+    }
+
+    .btn-grab:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-grab:disabled {
+      background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .btn-reset {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-reset:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    .success-message {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      color: #155724;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .section-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="navbar">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="../index.html">
+        <i class="fas fa-robot"></i> RoboLearn
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html#aboutUs">About Us</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              Learning Material
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="topic1.html">Topic 1</a></li>
+              <li><a class="dropdown-item" href="topic2.html">Topic 2</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="quizPage.html">Quiz</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="game1.html">Interactive</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div class="container">
+
+  <div class="section-card">
+    <h2 class="section-title">
+      <i class="fas fa-robot me-2"></i> 2D SCARA Robot - Coordinate Frames
+    </h2>
+    <p class="section-description">
+      Control a 2-link SCARA robot and learn about coordinate transformations! Each joint has its own coordinate frame (Base → Joint 1 → Joint 2 → End Effector). Use the sliders to control each joint angle and try to grab the target object. Watch how coordinates transform through each frame!
+    </p>
+
+    <div class="instructions">
+      <h6><i class="fas fa-info-circle me-2"></i>How to Use:</h6>
+      <ul>
+        <li>Use <strong>Joint 1 & Joint 2 sliders</strong> to control the robot arm angles</li>
+        <li>Move the <strong>end effector (gripper)</strong> to the target object</li>
+        <li>Watch the coordinate transformations through each frame: <strong>Base → J1 → J2 → End Effector</strong></li>
+        <li>When close enough, click <strong>"Grab Object"</strong> to pick it up!</li>
+        <li>Each frame shows the target's position relative to that coordinate system</li>
+      </ul>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="canvas-container">
+          <canvas id="scaraCanvas" width="800" height="600"></canvas>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="control-panel">
+          <label class="control-label">
+            <i class="fas fa-cog me-2"></i>Joint 1 Angle: <span id="joint1Value">45°</span>
+          </label>
+          <div class="slider-container">
+            <input type="range" min="-135" max="135" value="45" class="slider" id="joint1Slider">
+          </div>
+
+          <label class="control-label">
+            <i class="fas fa-cog me-2"></i>Joint 2 Angle: <span id="joint2Value">60°</span>
+          </label>
+          <div class="slider-container">
+            <input type="range" min="-135" max="135" value="60" class="slider" id="joint2Slider">
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h6 style="margin-bottom: 15px;"><i class="fas fa-crosshairs me-2"></i>End Effector Position</h6>
+          <div class="info-item">
+            <span class="info-label">X:</span>
+            <span class="info-value" id="endEffectorX">0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Y:</span>
+            <span class="info-value" id="endEffectorY">0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Distance to Target:</span>
+            <span class="info-value" id="distance">0</span>
+          </div>
+        </div>
+
+        <div class="info-panel" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+          <h6 style="margin-bottom: 10px; font-size: 0.9rem;"><i class="fas fa-home me-2"></i>Target in Base Frame</h6>
+          <div class="info-item">
+            <span class="info-label">X:</span>
+            <span class="info-value" id="targetBase_x">0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Y:</span>
+            <span class="info-value" id="targetBase_y">0</span>
+          </div>
+        </div>
+
+        <div class="info-panel" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+          <h6 style="margin-bottom: 10px; font-size: 0.9rem;"><i class="fas fa-arrow-right me-2"></i>Target in Joint 1 Frame</h6>
+          <div class="info-item">
+            <span class="info-label">X':</span>
+            <span class="info-value" id="targetJ1_x">0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Y':</span>
+            <span class="info-value" id="targetJ1_y">0</span>
+          </div>
+        </div>
+
+        <div class="info-panel" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+          <h6 style="margin-bottom: 10px; font-size: 0.9rem;"><i class="fas fa-arrow-right me-2"></i>Target in Joint 2 Frame</h6>
+          <div class="info-item">
+            <span class="info-label">X'':</span>
+            <span class="info-value" id="targetJ2_x">0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Y'':</span>
+            <span class="info-value" id="targetJ2_y">0</span>
+          </div>
+        </div>
+
+        <button class="btn-grab" id="grabBtn" onclick="grabObject()">
+          <i class="fas fa-hand-rock me-2"></i>Grab Object
+        </button>
+
+        <button class="btn-reset" onclick="resetRobot()">
+          <i class="fas fa-redo me-2"></i>Reset Position
+        </button>
+
+        <div class="success-message" id="successMsg">
+          <strong><i class="fas fa-check-circle me-2"></i>Success!</strong> Object grabbed! Great job controlling the SCARA robot!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mb-5">
+    <a href="../index.html" class="back-button">
+      <i class="fas fa-home"></i> Back to Home
+    </a>
+  </div>
+
+</div>
+
+<script>
+  const canvas = document.getElementById('scaraCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Robot parameters
+  const base = { x: 400, y: 500 };
+  const link1Length = 200;
+  const link2Length = 160;
+
+  let joint1Angle = 45 * Math.PI / 180;
+  let joint2Angle = 60 * Math.PI / 180;
+
+  // Target object
+  let target = { x: 550, y: 250 };
+  let grabbed = false;
+
+  // Joint sliders
+  const joint1Slider = document.getElementById('joint1Slider');
+  const joint2Slider = document.getElementById('joint2Slider');
+
+  joint1Slider.addEventListener('input', (e) => {
+    joint1Angle = (e.target.value * Math.PI) / 180;
+    document.getElementById('joint1Value').textContent = e.target.value + '°';
+    draw();
+  });
+
+  joint2Slider.addEventListener('input', (e) => {
+    joint2Angle = (e.target.value * Math.PI) / 180;
+    document.getElementById('joint2Value').textContent = e.target.value + '°';
+    draw();
+  });
+
+  function calculateJointPositions() {
+    // Joint 1 position (end of link 1)
+    const joint1 = {
+      x: base.x + link1Length * Math.cos(joint1Angle),
+      y: base.y - link1Length * Math.sin(joint1Angle)
+    };
+
+    // End effector position (end of link 2)
+    const totalAngle = joint1Angle + joint2Angle;
+    const endEffector = {
+      x: joint1.x + link2Length * Math.cos(totalAngle),
+      y: joint1.y - link2Length * Math.sin(totalAngle)
+    };
+
+    return { joint1, endEffector, totalAngle };
+  }
+
+  function drawGrid() {
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= canvas.width; i += 50) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, canvas.height);
+      ctx.stroke();
+    }
+
+    for (let i = 0; i <= canvas.height; i += 50) {
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(canvas.width, i);
+      ctx.stroke();
+    }
+  }
+
+  function drawFrame(x, y, angle, color, label, scale = 60) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(-angle);
+
+    // X axis
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(scale, 0);
+    ctx.stroke();
+
+    // Arrow
+    ctx.beginPath();
+    ctx.moveTo(scale, 0);
+    ctx.lineTo(scale - 10, -5);
+    ctx.lineTo(scale - 10, 5);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // Y axis
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -scale);
+    ctx.stroke();
+
+    // Arrow
+    ctx.beginPath();
+    ctx.moveTo(0, -scale);
+    ctx.lineTo(-5, -scale + 10);
+    ctx.lineTo(5, -scale + 10);
+    ctx.closePath();
+    ctx.fill();
+
+    // Label
+    ctx.fillStyle = color;
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText(label, scale + 5, 5);
+
+    ctx.restore();
+  }
+
+  function drawRobot() {
+    const { joint1, endEffector, totalAngle } = calculateJointPositions();
+
+    // Draw base frame (red)
+    drawFrame(base.x, base.y, 0, '#e74c3c', 'Base', 100);
+
+    // Draw base platform
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillRect(base.x - 40, base.y, 80, 20);
+
+    // Draw base cylinder
+    ctx.fillStyle = '#34495e';
+    ctx.beginPath();
+    ctx.arc(base.x, base.y, 25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#1a252f';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Draw motor housing for base
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillRect(base.x - 15, base.y - 15, 30, 30);
+
+    // Draw link 1 with robotic details
+    ctx.save();
+    ctx.translate(base.x, base.y);
+    ctx.rotate(-joint1Angle);
+
+    // Link 1 main body
+    ctx.fillStyle = '#667eea';
+    ctx.fillRect(0, -10, link1Length, 20);
+
+    // Link 1 details (segments)
+    ctx.fillStyle = '#4a5fb8';
+    for (let i = 30; i < link1Length; i += 40) {
+      ctx.fillRect(i, -8, 8, 16);
+    }
+
+    // Link 1 edge highlight
+    ctx.strokeStyle = '#5a6fca';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, -10, link1Length, 20);
+
+    ctx.restore();
+
+    // Draw joint 1 frame (blue)
+    drawFrame(joint1.x, joint1.y, joint1Angle, '#3498db', 'J1', 85);
+
+    // Draw joint 1 housing
+    ctx.fillStyle = '#3498db';
+    ctx.beginPath();
+    ctx.arc(joint1.x, joint1.y, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2980b9';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Joint 1 center bolt
+    ctx.fillStyle = '#2c3e50';
+    ctx.beginPath();
+    ctx.arc(joint1.x, joint1.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw link 2 with robotic details
+    ctx.save();
+    ctx.translate(joint1.x, joint1.y);
+    ctx.rotate(-totalAngle);
+
+    // Link 2 main body
+    ctx.fillStyle = '#9b59b6';
+    ctx.fillRect(0, -9, link2Length, 18);
+
+    // Link 2 details (segments)
+    ctx.fillStyle = '#8e44ad';
+    for (let i = 25; i < link2Length; i += 35) {
+      ctx.fillRect(i, -7, 6, 14);
+    }
+
+    // Link 2 edge highlight
+    ctx.strokeStyle = '#a569bd';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, -9, link2Length, 18);
+
+    ctx.restore();
+
+    // Draw joint 2 frame (purple)
+    drawFrame(endEffector.x, endEffector.y, totalAngle, '#9b59b6', 'J2', 75);
+
+    // Draw end effector housing
+    ctx.fillStyle = '#9b59b6';
+    ctx.beginPath();
+    ctx.arc(endEffector.x, endEffector.y, 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#8e44ad';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Draw end effector (robotic gripper)
+    ctx.save();
+    ctx.translate(endEffector.x, endEffector.y);
+    ctx.rotate(-totalAngle);
+
+    // Gripper base/mount
+    ctx.fillStyle = '#27ae60';
+    ctx.fillRect(-12, -12, 24, 24);
+    ctx.strokeStyle = '#229954';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-12, -12, 24, 24);
+
+    // Gripper center mechanism
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillRect(8, -6, 15, 12);
+
+    // Gripper fingers with more detail
+    const fingerOpen = grabbed ? 8 : 18;
+
+    // Upper finger
+    ctx.fillStyle = '#27ae60';
+    ctx.fillRect(18, -fingerOpen - 4, 25, 8);
+    ctx.strokeStyle = '#229954';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(18, -fingerOpen - 4, 25, 8);
+
+    // Upper finger tip
+    ctx.fillStyle = '#34495e';
+    ctx.fillRect(38, -fingerOpen - 3, 8, 6);
+
+    // Lower finger
+    ctx.fillStyle = '#27ae60';
+    ctx.fillRect(18, fingerOpen - 4, 25, 8);
+    ctx.strokeRect(18, fingerOpen - 4, 25, 8);
+
+    // Lower finger tip
+    ctx.fillStyle = '#34495e';
+    ctx.fillRect(38, fingerOpen - 3, 8, 6);
+
+    // Gripper joint pins
+    ctx.fillStyle = '#2c3e50';
+    ctx.beginPath();
+    ctx.arc(23, -fingerOpen, 3, 0, Math.PI * 2);
+    ctx.arc(23, fingerOpen, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+
+    return { joint1, endEffector, totalAngle };
+  }
+
+  function drawTarget() {
+    if (grabbed) {
+      const { endEffector, totalAngle } = calculateJointPositions();
+      target.x = endEffector.x + 50 * Math.cos(totalAngle);
+      target.y = endEffector.y - 50 * Math.sin(totalAngle);
+    }
+
+    // Target object - make it look like a box
+    ctx.save();
+    ctx.translate(target.x, target.y);
+
+    // Box shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillRect(-18, -18, 36, 36);
+
+    // Main box
+    ctx.fillStyle = '#f39c12';
+    ctx.fillRect(-20, -20, 36, 36);
+    ctx.strokeStyle = '#e67e22';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(-20, -20, 36, 36);
+
+    // Box details
+    ctx.strokeStyle = '#d68910';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-20, 0);
+    ctx.lineTo(16, 0);
+    ctx.moveTo(0, -20);
+    ctx.lineTo(0, 16);
+    ctx.stroke();
+
+    // Handle
+    ctx.fillStyle = '#e67e22';
+    ctx.fillRect(-10, -25, 20, 8);
+    ctx.strokeStyle = '#d68910';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-10, -25, 20, 8);
+
+    ctx.restore();
+
+    // Target label
+    ctx.fillStyle = '#f39c12';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Target', target.x - 25, target.y - 35);
+  }
+
+  function transformToLocalFrame(pointX, pointY, frameX, frameY, frameAngle) {
+    // Translate
+    const dx = pointX - frameX;
+    const dy = pointY - frameY;
+
+    // Rotate (inverse)
+    const cosTheta = Math.cos(frameAngle);
+    const sinTheta = Math.sin(frameAngle);
+
+    const localX = dx * cosTheta + dy * sinTheta;
+    const localY = -dx * sinTheta + dy * cosTheta;
+
+    return { x: localX, y: localY };
+  }
+
+  function updateCoordinates() {
+    const { joint1, endEffector, totalAngle } = calculateJointPositions();
+
+    // End effector position
+    document.getElementById('endEffectorX').textContent = Math.round(endEffector.x);
+    document.getElementById('endEffectorY').textContent = Math.round(endEffector.y);
+
+    // Distance to target
+    const dx = endEffector.x - target.x;
+    const dy = endEffector.y - target.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    document.getElementById('distance').textContent = Math.round(distance) + ' px';
+
+    // Update grab button
+    const grabBtn = document.getElementById('grabBtn');
+    if (distance < 50 && !grabbed) {
+      grabBtn.disabled = false;
+      grabBtn.innerHTML = '<i class="fas fa-hand-rock me-2"></i>Grab Object (In Range!)';
+    } else if (grabbed) {
+      grabBtn.disabled = true;
+      grabBtn.innerHTML = '<i class="fas fa-check me-2"></i>Object Grabbed!';
+    } else {
+      grabBtn.disabled = true;
+      grabBtn.innerHTML = '<i class="fas fa-hand-rock me-2"></i>Grab Object (Too Far)';
+    }
+
+    // Target in base frame (world coordinates)
+    document.getElementById('targetBase_x').textContent = Math.round(target.x);
+    document.getElementById('targetBase_y').textContent = Math.round(target.y);
+
+    // Target in Joint 1 frame
+    const targetInJ1 = transformToLocalFrame(target.x, target.y, joint1.x, joint1.y, joint1Angle);
+    document.getElementById('targetJ1_x').textContent = Math.round(targetInJ1.x);
+    document.getElementById('targetJ1_y').textContent = Math.round(targetInJ1.y);
+
+    // Target in Joint 2 frame (end effector)
+    const targetInJ2 = transformToLocalFrame(target.x, target.y, endEffector.x, endEffector.y, totalAngle);
+    document.getElementById('targetJ2_x').textContent = Math.round(targetInJ2.x);
+    document.getElementById('targetJ2_y').textContent = Math.round(targetInJ2.y);
+  }
+
+  function grabObject() {
+    const { endEffector } = calculateJointPositions();
+    const dx = endEffector.x - target.x;
+    const dy = endEffector.y - target.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < 50) {
+      grabbed = true;
+      document.getElementById('successMsg').classList.add('show');
+      draw();
+    }
+  }
+
+  function resetRobot() {
+    joint1Angle = 45 * Math.PI / 180;
+    joint2Angle = 60 * Math.PI / 180;
+    joint1Slider.value = 45;
+    joint2Slider.value = 60;
+    document.getElementById('joint1Value').textContent = '45°';
+    document.getElementById('joint2Value').textContent = '60°';
+
+    target = { x: 550, y: 250 };
+    grabbed = false;
+    document.getElementById('successMsg').classList.remove('show');
+
+    draw();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ecf0f1';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawGrid();
+    drawTarget();
+    drawRobot();
+    updateCoordinates();
+  }
+
+  draw();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
