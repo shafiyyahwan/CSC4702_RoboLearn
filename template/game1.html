@@ -501,6 +501,29 @@
   const canvas = document.getElementById('sensorCanvas');
   const ctx = canvas.getContext('2d');
 
+  // ====== CANVAS BASE (consistent across devices) ======
+  const BASE_W = 800;
+  const BASE_H = 600;
+
+  // Make canvas responsive while keeping the SAME logical coordinate system
+  canvas.style.width = "100%";
+  canvas.style.height = "auto";
+  canvas.style.aspectRatio = `${BASE_W}/${BASE_H}`;
+
+  function setupCanvasScale() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(BASE_W * dpr);
+    canvas.height = Math.floor(BASE_H * dpr);
+    // 1 logical unit = 1 pixel in your drawing logic (scaled to device pixels)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  window.addEventListener("resize", () => {
+    setupCanvasScale();
+    draw();
+  });
+
+  // ====== GAME STATE ======
   const car = {
     x: 100,
     y: 300,
@@ -515,8 +538,14 @@
   let coinsCollected = 0;
   let crashed = false;
   let levelComplete = false;
-  let unlockedLevels = 1;
 
+  // Persist unlocking across refresh
+  let unlockedLevels = Number(localStorage.getItem("unlockedLevels") || 1);
+
+  // Optional: set true if you want to test all levels anytime
+  const DEBUG_UNLOCK_ALL = true;
+
+  // ====== LEVELS ======
   const levels = {
     1: {
       obstacles: [
@@ -542,14 +571,13 @@
         {x: 0, y: 580, width: 800, height: 20},
         {x: 0, y: 0, width: 20, height: 600},
         {x: 780, y: 0, width: 20, height: 600},
-        {x: 180, y: 100, width: 80, height: 200},
+        {x: 150, y: 100, width: 80, height: 200},
         {x: 350, y: 250, width: 80, height: 200},
         {x: 580, y: 120, width: 90, height: 180},
       ],
       coins: [
         {x: 50, y: 80},
         {x: 280, y: 140},
-        {x: 280, y: 480},
         {x: 480, y: 120},
         {x: 680, y: 300}
       ],
@@ -562,40 +590,120 @@
         {x: 0, y: 580, width: 800, height: 20},
         {x: 0, y: 0, width: 20, height: 600},
         {x: 780, y: 0, width: 20, height: 600},
-
         {x: 160, y: 70, width: 70, height: 180},
         {x: 320, y: 60, width: 200, height: 70},
-        {x: 220, y: 350, width: 70, height: 180},
         {x: 450, y: 280, width: 80, height: 220},
         {x: 650, y: 100, width: 70, height: 150}
       ],
-
       coins: [
-        {x: 80,  y: 180},   // left corridor
-        {x: 260, y: 120},   // ABOVE first obstacle
-        {x: 260, y: 260},   // between first & middle obstacles
-        {x: 260, y: 520},   // below lower-left obstacle
-        {x: 520, y: 250},   // gap between middle-right obstacles
-        {x: 700, y: 480}    // bottom-right safe zone
+        {x: 80,  y: 180},
+        {x: 260, y: 300},
+        {x: 300, y: 520},
+        {x: 520, y: 200},
+        {x: 700, y: 480}
       ],
-
       startX: 70,
       startY: 70
     }
   };
 
-  function loadLevel(level) {
-    if (level > unlockedLevels) return;
+  // ====== COIN SAFETY (avoid obstacles / walls) ======
+  const COIN_R = 12;
+  const COIN_MARGIN = 6;
+  const WALL_THICKNESS = 20;
 
-    currentLevel = level;
+  function clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+  }
+
+  function circleIntersectsRect(cx, cy, r, rect) {
+    const closestX = clamp(cx, rect.x, rect.x + rect.width);
+    const closestY = clamp(cy, rect.y, rect.y + rect.height);
+    const dx = cx - closestX;
+    const dy = cy - closestY;
+    return (dx * dx + dy * dy) < (r * r);
+  }
+
+  function coinValid(x, y, obstacles) {
+    const minX = WALL_THICKNESS + COIN_R + COIN_MARGIN;
+    const maxX = BASE_W - WALL_THICKNESS - COIN_R - COIN_MARGIN;
+    const minY = WALL_THICKNESS + COIN_R + COIN_MARGIN;
+    const maxY = BASE_H - WALL_THICKNESS - COIN_R - COIN_MARGIN;
+
+    if (x < minX || x > maxX || y < minY || y > maxY) return false;
+
+    for (const obs of obstacles) {
+      if (circleIntersectsRect(x, y, COIN_R + COIN_MARGIN, obs)) return false;
+    }
+    return true;
+  }
+
+  function adjustCoins(levelData) {
+    const obstacles = levelData.obstacles;
+
+    return levelData.coins.map((c) => {
+      let x = c.x;
+      let y = c.y;
+
+      // clamp inside safe region
+      x = clamp(x, WALL_THICKNESS + COIN_R + COIN_MARGIN, BASE_W - WALL_THICKNESS - COIN_R - COIN_MARGIN);
+      y = clamp(y, WALL_THICKNESS + COIN_R + COIN_MARGIN, BASE_H - WALL_THICKNESS - COIN_R - COIN_MARGIN);
+
+      if (!coinValid(x, y, obstacles)) {
+        const offsets = [
+          [0, -40], [0, 40], [-40, 0], [40, 0],
+          [-40, -40], [40, -40], [-40, 40], [40, 40],
+          [0, -70], [0, 70], [-70, 0], [70, 0],
+        ];
+
+        let placed = false;
+        for (const [dx, dy] of offsets) {
+          const nx = clamp(x + dx, WALL_THICKNESS + COIN_R + COIN_MARGIN, BASE_W - WALL_THICKNESS - COIN_R - COIN_MARGIN);
+          const ny = clamp(y + dy, WALL_THICKNESS + COIN_R + COIN_MARGIN, BASE_H - WALL_THICKNESS - COIN_R - COIN_MARGIN);
+          if (coinValid(nx, ny, obstacles)) {
+            x = nx; y = ny;
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) console.warn("Could not safely place coin:", c);
+      }
+
+      return { x, y, collected: false };
+    });
+  }
+
+  // ====== UI HELPERS ======
+  function updateCoinDisplay() {
+    document.getElementById('coinsCollected').textContent = `${coinsCollected} / ${coins.length}`;
+  }
+
+  function updateLevelButtons() {
+    document.getElementById('level1Btn').disabled = false;
+    document.getElementById('level2Btn').disabled = unlockedLevels < 2 && !DEBUG_UNLOCK_ALL;
+    document.getElementById('level3Btn').disabled = unlockedLevels < 3 && !DEBUG_UNLOCK_ALL;
+
+    if (unlockedLevels >= 2 || DEBUG_UNLOCK_ALL) {
+      document.getElementById('level2Btn').innerHTML = 'Level 2';
+    }
+    if (unlockedLevels >= 3 || DEBUG_UNLOCK_ALL) {
+      document.getElementById('level3Btn').innerHTML = 'Level 3';
+    }
+  }
+
+  // ====== LEVEL LOADING (FIXED) ======
+  function loadLevel(level) {
+    if (!DEBUG_UNLOCK_ALL && level > unlockedLevels) return;
+
+    currentLevel = level; // ✅ IMPORTANT: do NOT hardcode this
     const levelData = levels[level];
 
     car.x = levelData.startX;
     car.y = levelData.startY;
     car.angle = 0;
 
-    // Use fixed coin positions from level data (no scaling needed)
-    coins = levelData.coins.map(c => ({...c, collected: false}));
+    // Coins are adjusted to be safe across devices/obstacles
+    coins = adjustCoins(levelData);
 
     coinsCollected = 0;
     crashed = false;
@@ -615,27 +723,16 @@
     draw();
   }
 
-  function updateLevelButtons() {
-    document.getElementById('level1Btn').disabled = false;
-    document.getElementById('level2Btn').disabled = unlockedLevels < 2;
-    document.getElementById('level3Btn').disabled = unlockedLevels < 3;
-
-    if (unlockedLevels >= 2) {
-      document.getElementById('level2Btn').innerHTML = 'Level 2';
-    }
-    if (unlockedLevels >= 3) {
-      document.getElementById('level3Btn').innerHTML = 'Level 3';
-    }
-  }
-
   function goToNextLevel() {
     if (currentLevel < 3) {
       unlockedLevels = Math.max(unlockedLevels, currentLevel + 1);
+      localStorage.setItem("unlockedLevels", unlockedLevels);
       updateLevelButtons();
       loadLevel(currentLevel + 1);
     }
   }
 
+  // ====== DRAWING ======
   function drawCar() {
     ctx.save();
     ctx.translate(car.x, car.y);
@@ -657,11 +754,11 @@
   }
 
   function drawCoins() {
-    coins.forEach((coin, idx) => {
+    coins.forEach((coin) => {
       if (!coin.collected) {
         ctx.fillStyle = '#f1c40f';
         ctx.beginPath();
-        ctx.arc(coin.x, coin.y, 12, 0, Math.PI * 2);
+        ctx.arc(coin.x, coin.y, COIN_R, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.strokeStyle = '#f39c12';
@@ -677,8 +774,9 @@
     });
   }
 
+  // ====== COIN COLLECTION ======
   function checkCoinCollection() {
-    coins.forEach((coin, idx) => {
+    coins.forEach((coin) => {
       if (!coin.collected) {
         const dx = car.x - coin.x;
         const dy = car.y - coin.y;
@@ -699,10 +797,7 @@
     });
   }
 
-  function updateCoinDisplay() {
-    document.getElementById('coinsCollected').textContent = `${coinsCollected} / ${coins.length}`;
-  }
-
+  // ====== SENSORS / COLLISION ======
   function castRay(startX, startY, angle, maxDist = 200) {
     const step = 2;
     let dist = 0;
@@ -720,7 +815,10 @@
       dist += step;
     }
 
-    return {dist: maxDist, hit: false, x: startX + Math.cos(angle) * maxDist, y: startY + Math.sin(angle) * maxDist};
+    return {dist: maxDist, hit: false,
+      x: startX + Math.cos(angle) * maxDist,
+      y: startY + Math.sin(angle) * maxDist
+    };
   }
 
   function checkCarCollision() {
@@ -762,16 +860,12 @@
     ];
 
     const maxRange = 200;
-    let minDistance = maxRange;
 
     sensors.forEach(sensor => {
       const result = castRay(car.x, car.y, sensor.angle);
-
-      // The cone length is the hit distance or max range if clear
       const displayDist = result.hit ? result.dist : maxRange;
       const spreadAngle = 0.2;
 
-      // 1. Draw the Triangular Cone (Always visible)
       ctx.beginPath();
       ctx.moveTo(car.x, car.y);
       ctx.lineTo(
@@ -784,42 +878,53 @@
       );
       ctx.closePath();
 
-      // Cone is Green by default, Red if it hits something
       ctx.fillStyle = result.hit ? 'rgba(231, 76, 60, 0.1)' : 'rgba(39, 174, 96, 0.1)';
       ctx.fill();
 
-      // 2. Draw Dotted pattern (Restored to your original colors)
       for (let i = 0; i < displayDist; i += 20) {
         const circleX = car.x + Math.cos(sensor.angle) * i;
         const circleY = car.y + Math.sin(sensor.angle) * i;
 
         ctx.beginPath();
         ctx.arc(circleX, circleY, 3, 0, Math.PI * 2);
-        // Original logic: Red-ish if hit, Green-ish if clear
         ctx.fillStyle = result.hit ? 'rgba(231, 76, 60, 0.3)' : 'rgba(39, 174, 96, 0.3)';
         ctx.fill();
       }
 
-      // 3. Draw impact point if hit
       if (result.hit) {
         ctx.fillStyle = '#e74c3c';
         ctx.beginPath();
         ctx.arc(result.x, result.y, 5, 0, Math.PI * 2);
         ctx.fill();
-
-        if (result.dist < minDistance) minDistance = result.dist;
       }
 
-      // --- UI Update Logic ---
       const distCm = Math.round(result.dist / 2);
       const distElement = document.getElementById(sensor.label + 'Dist');
       distElement.textContent = distCm + ' cm';
       distElement.style.color = distCm < 20 ? '#e74c3c' : (distCm < 40 ? '#f39c12' : '#fff');
+
+      // Crash check based on sensor distance (<20cm)
+      if (distCm < 20 && !crashed && !levelComplete) {
+        crashed = true;
+        document.getElementById('crashAlert').classList.add('show');
+        document.getElementById('resetBtn').style.display = 'block';
+        document.getElementById('warningAlert').classList.remove('show');
+
+        canvas.style.animation = 'shake 0.5s';
+        setTimeout(() => canvas.style.animation = '', 500);
+      } else if (distCm < 40 && !crashed && !levelComplete) {
+        document.getElementById('warningAlert').classList.add('show');
+      }
     });
 
-    // (Remaining crash/warning logic stays exactly as you had it)
+    if (!crashed) {
+      // hide warning if not near anything
+      // (simple approach: keep it hidden unless re-triggered)
+      // You can refine if you want per-sensor logic.
+    }
   }
 
+  // ====== MOVEMENT ======
   function moveCar(direction) {
     if (crashed || levelComplete) return;
 
@@ -844,14 +949,11 @@
         break;
     }
 
-    // Check if car body is colliding with obstacles
     if (checkCarCollision()) {
-      // Revert movement
       car.x = oldX;
       car.y = oldY;
       car.angle = oldAngle;
 
-      // Trigger crash
       if (!crashed) {
         crashed = true;
         document.getElementById('crashAlert').classList.add('show');
@@ -859,9 +961,7 @@
         document.getElementById('warningAlert').classList.remove('show');
 
         canvas.style.animation = 'shake 0.5s';
-        setTimeout(() => {
-          canvas.style.animation = '';
-        }, 500);
+        setTimeout(() => canvas.style.animation = '', 500);
       }
       return;
     }
@@ -869,6 +969,10 @@
     checkCoinCollection();
     draw();
   }
+
+  // ====== RESET ======
+  const keys = {};
+  let animationFrameId = null;
 
   function resetCar() {
     Object.keys(keys).forEach(key => keys[key] = false);
@@ -879,23 +983,24 @@
     loadLevel(currentLevel);
   }
 
+  // ====== DRAW LOOP ======
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, BASE_W, BASE_H);
     ctx.fillStyle = '#ecf0f1';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, BASE_W, BASE_H);
 
     ctx.strokeStyle = '#ddd';
     ctx.lineWidth = 1;
-    for (let i = 0; i < canvas.width; i += 50) {
+    for (let i = 0; i < BASE_W; i += 50) {
       ctx.beginPath();
       ctx.moveTo(i, 0);
-      ctx.lineTo(i, canvas.height);
+      ctx.lineTo(i, BASE_H);
       ctx.stroke();
     }
-    for (let i = 0; i < canvas.height; i += 50) {
+    for (let i = 0; i < BASE_H; i += 50) {
       ctx.beginPath();
       ctx.moveTo(0, i);
-      ctx.lineTo(canvas.width, i);
+      ctx.lineTo(BASE_W, i);
       ctx.stroke();
     }
 
@@ -905,17 +1010,12 @@
     drawCar();
   }
 
-  const keys = {};
-  let animationFrameId = null;
-
+  // ====== KEYBOARD CONTROLS ======
   document.addEventListener('keydown', (e) => {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
       e.preventDefault();
       keys[e.key] = true;
-
-      if (!animationFrameId) {
-        gameLoop();
-      }
+      if (!animationFrameId) gameLoop();
     }
   });
 
@@ -934,22 +1034,10 @@
 
     let moved = false;
 
-    if (keys['ArrowUp']) {
-      moveCar('up');
-      moved = true;
-    }
-    if (keys['ArrowDown']) {
-      moveCar('down');
-      moved = true;
-    }
-    if (keys['ArrowLeft']) {
-      moveCar('left');
-      moved = true;
-    }
-    if (keys['ArrowRight']) {
-      moveCar('right');
-      moved = true;
-    }
+    if (keys['ArrowUp']) { moveCar('up'); moved = true; }
+    if (keys['ArrowDown']) { moveCar('down'); moved = true; }
+    if (keys['ArrowLeft']) { moveCar('left'); moved = true; }
+    if (keys['ArrowRight']) { moveCar('right'); moved = true; }
 
     if (moved || Object.values(keys).some(k => k)) {
       animationFrameId = requestAnimationFrame(gameLoop);
@@ -958,13 +1046,8 @@
     }
   }
 
-  // Mobile touch controls
-  const touchButtons = {
-    btnUp: 'up',
-    btnDown: 'down',
-    btnLeft: 'left',
-    btnRight: 'right'
-  };
+  // ====== MOBILE CONTROLS ======
+  const touchButtons = { btnUp: 'up', btnDown: 'down', btnLeft: 'left', btnRight: 'right' };
 
   Object.keys(touchButtons).forEach(btnId => {
     const btn = document.getElementById(btnId);
@@ -973,9 +1056,7 @@
     const startMoving = (e) => {
       e.preventDefault();
       keys['Arrow' + direction.charAt(0).toUpperCase() + direction.slice(1)] = true;
-      if (!animationFrameId) {
-        gameLoop();
-      }
+      if (!animationFrameId) gameLoop();
     };
 
     const stopMoving = (e) => {
@@ -986,15 +1067,17 @@
     btn.addEventListener('touchstart', startMoving);
     btn.addEventListener('touchend', stopMoving);
     btn.addEventListener('touchcancel', stopMoving);
-
-    // Also support mouse for testing
     btn.addEventListener('mousedown', startMoving);
     btn.addEventListener('mouseup', stopMoving);
     btn.addEventListener('mouseleave', stopMoving);
   });
 
+  // ====== INIT ======
+  setupCanvasScale();
+  updateLevelButtons();
   loadLevel(1);
 </script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
